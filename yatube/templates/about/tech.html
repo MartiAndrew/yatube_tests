@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}<title>Технологии</title>{% endblock %}
+{% block content %}
+{% load static %}
+<div class="container mt-3">
+    <h1>Технологии</h1>
+    {% now "jS F Y H:i" %}
+    <div class="row">
+        <div class="col-md-2">
+            <div class="list-group">
+                <a href="https://www.python.org/" class="list-group-item list-group-item-action">Python</a>
+                <a href="https://www.djangoproject.com/" class="list-group-item list-group-item-action">Django</a>
+            </div>
+        </div>
+        <div class="col-md-10">
+            <div class="card mb-3">
+                <div class="card-header">
+                    Вот что я умею
+                </div>
+                <div class="card-body">
+                    <div class="media">
+                        <img src="{% static 'img/PyDj.jpg' %}" alt="моё фото" width="235" class="mr-3">
+                        <div class="media-body">
+                            <p class="card-text"> Это мой первый сайт который я делаю сам в рамках курса
+                                Yandex Practicum. Я надеюсь к концу курса он станет более осмысленным и
+                                профессиональным.
+                                Пока же я применил в нём основы проектирования на Django. Создал проект и приложения в
+                                нём,
+                                рендерил шаблоны. Какие-то шаблоны сам изменял с помощью Bootstrap. Создал на сайте
+                                записи и группы на основе моделей Django, настроил страницу администратора и попытался
+                                создать формы регистрации и входа на сайт. Эту страницу я создал с помощью встроенного
+                                в Django view-класса TemplateView</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer text-muted">
+                    {{ item.created_at|date:"Y-m-d H:i:s" }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

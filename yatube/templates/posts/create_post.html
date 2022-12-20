@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load user_filters %}
+{% block title %}
+  {% if is_edit %}
+   <title>Редактирование поста</title>
+   {% else %}
+   <title>Новая запись</title>
+  {% endif %}
+{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 p-5">
+        <div class="card">
+            <div class="card-header">
+                {% if is_edit %}
+                Редактировать запись
+                {% else %}
+                Новая запись
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    {% for field in form %}
+                    <div class="group">
+                        {{ field }}
+                        <span class="highlight"></span>
+                        <span class="bar"></span>
+                        <label>{{ field.label }}</label>
+                        <span>{{ field.errors }}</span>
+                        {% if field.help_text %}
+                        <small id="{{ field.id_for_label }}-help" class="form-texts text-muted">
+                            {{ field.help_text|safe }}
+                        </small>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                    {% if is_edit %}
+                    <button type="submit" class="btn btn-primary">
+                        Сохранить
+                    </button>
+                    {% else %}
+                    <button type="submit" class="btn btn-primary">
+                        Добавить
+                    </button>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

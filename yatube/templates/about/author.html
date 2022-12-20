@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}<title>Об авторе проекта</title>{% endblock %}
+{% block content %}
+{% load static %}
+<div class="container mt-3">
+    <h1>Об авторе</h1>
+    {% now "jS F Y H:i" %}
+    <div class="row">
+        <div class="col-md-2">
+            <div class="list-group">
+                <a href="{% url 'about:author' %}" class="list-group-item list-group-item-action">Об авторе</a>
+                <a href="{% url 'about:tech' %}" class="list-group-item list-group-item-action">Технологии</a>
+            </div>
+        </div>
+        <div class="col-md-10">
+            <div class="card mb-3">
+                <div class="card-header">
+                    Обо мне
+                </div>
+                <div class="card-body">
+                    <div class="media">
+                        <img src="{% static 'img/foto.jpg' %}" alt="моё фото" width="235" class="mr-3">
+                        <div class="media-body">
+                            <p class="card-text"> В мире програмирования я недавно. С сентября 2022 г. изучаю Python
+                                и с ноября 2022 года фреймворк Django. Ранее опыта практически не было, не считая
+                                QBasic в начале 2000-х в институте. Сейчас мне все даётся не просто. Но семья меня
+                                поддерживает, видя как долгими вечерами я до поздна сижу у компьютера.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer text-muted">
+                    {{ item.created_at|date:"Y-m-d H:i:s" }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
