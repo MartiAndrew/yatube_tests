@@ -79,7 +79,8 @@ class PostPagesTests(TestCase):
                         ))
         author = response.context['author']
         posts_count = response.context['posts_count']
-        self.assertEqual(author, User.objects.get(username=self.user.username))
+        self.assertEqual(author, User.objects.get(
+            username=self.user.username))
         self.assertEqual(posts_count, Post.objects.filter(
             author__username=self.user.username
         ).count()
@@ -182,8 +183,7 @@ class PaginatorViewsTest(TestCase):
                     ): LENGHT_LIST,
             reverse('posts:profile',
                     kwargs={'username': self.user.username}
-                    ):
-                LENGHT_LIST,
+                                     ):LENGHT_LIST,
         }
         for reverse_template, expected in templates_pages_names.items():
             with self.subTest(reverse_template=reverse_template):
@@ -202,8 +202,7 @@ class PaginatorViewsTest(TestCase):
                     ): second_page_posts,
             reverse('posts:profile',
                     kwargs={'username': self.user.username}
-                    ):
-                second_page_posts,
+                                     ):second_page_posts,
         }
         for reverse_template, expected in templates_pages_names.items():
             with self.subTest(reverse_template=reverse_template):
