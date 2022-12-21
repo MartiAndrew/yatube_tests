@@ -34,6 +34,8 @@ class PostModelTest(TestCase):
     def test_title_label(self):
         post = PostModelTest.post
         field_verboses = {
+            'text': 'Текст поста',
+            'pub_date': 'Дата публикации',
             'author': 'Автор',
             'group': 'Группа',
         }
@@ -41,4 +43,19 @@ class PostModelTest(TestCase):
             with self.subTest(field=field):
                 self.assertEqual(
                     post._meta.get_field(field).verbose_name, expected_value
+                )
+
+    def test_post_help_text(self):
+        """Проверяем, help_text'ы у модели Post."""
+        post = PostModelTest.post
+
+        field_help_texts = {
+            'text': 'Введите текст поста',
+            'group': 'Выберите группу',
+        }
+
+        for field, expected_help_text in field_help_texts.items():
+            with self.subTest(field=field):
+                self.assertEqual(
+                    post._meta.get_field(field).help_text, expected_help_text
                 )
