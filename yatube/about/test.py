@@ -1,22 +1,32 @@
 from django.test import Client, TestCase
+from http import HTTPStatus
 
 
-class StaticURLTests(TestCase):
+class AboutURLTests(TestCase):
     def setUp(self):
         self.guest_client = Client()
 
-    def test_about(self):
-        response = self.guest_client.get('/about/author/')
-        self.assertEqual(response.status_code, 200)
+    def test_about_urls_exists_at_desired_locations(self):
+        """Проверяем доступность страниц по URL приложения About."""
 
-    def test_tech(self):
-        response = self.guest_client.get('/about/tech/')
-        self.assertEqual(response.status_code, 200)
+        field_url_names = {
+            '/about/author/': HTTPStatus.OK,
+            '/about/tech/': HTTPStatus.OK,
+        }
+        for value, expected in field_url_names.items():
+            with self.subTest(value=value):
+                response = self.client.get(value).status_code
+                self.assertEqual(response, expected)
 
-    def test_about_author_url_uses_correct_template(self):
-        response = self.guest_client.get('/about/author/')
-        self.assertTemplateUsed(response, 'about/author.html')
+    def test_about_urls_uses_correct_template(self):
+        """Проверяем шаблоны страниц приложения About."""
 
-    def test_about_tech_url_uses_correct_template(self):
-        response = self.guest_client.get('/about/tech/')
-        self.assertTemplateUsed(response, 'about/tech.html')
+        url_templates_names = {
+            '/about/author/': 'about/author.html',
+            '/about/tech/': 'about/tech.html',
+        }
+
+        for address, template in url_templates_names.items():
+            with self.subTest(address=address):
+                response = self.guest_client.get(address)
+                self.assertTemplateUsed(response, template)
