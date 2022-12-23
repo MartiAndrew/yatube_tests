@@ -180,7 +180,7 @@ class PaginatorViewsTest(TestCase):
 
     def test_posts_pages_correct_paginator_work(self):
         """Проверка паджинатора на нужных страницах"""
-        urls_page2posts_names = {
+        urls_names_2page = {
             reverse('posts:index'): 3,
             reverse('posts:group_list', kwargs={
                 'slug': PaginatorViewsTest.group.slug}): 3,
@@ -188,7 +188,7 @@ class PaginatorViewsTest(TestCase):
                 'username': PaginatorViewsTest.author.username}): 3,
         }
 
-        for page, page_2_posts in urls_page2posts_names.items():
+        for page, page_2_posts in urls_names_2page.items():
             with self.subTest(page=page):
                 response_page_1 = self.guest_client.get(page)
                 response_page_2 = self.guest_client.get(page + '?page=2')
