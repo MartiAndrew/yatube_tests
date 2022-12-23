@@ -5,6 +5,7 @@ from posts.models import Group, Post, User
 
 PAGE_1_POSTS = 10
 
+
 class PostViewTests(TestCase):
     @classmethod
     def setUpClass(cls):
@@ -57,7 +58,7 @@ class PostViewTests(TestCase):
     def test_index_show_correct_context(self):
         """Шаблон index сформирован с правильным контекстом."""
         response = self.auth_client.get(reverse('posts:index'))
-        context = Post.objects.first()
+        context = response.context['page_obj'][0]
         self.assertEqual(context.text, 'test_text')
         self.assertEqual(context.author, self.author)
         self.assertEqual(context.group, self.group_1)
@@ -65,16 +66,20 @@ class PostViewTests(TestCase):
     def test_group_list_show_correct_context(self):
         """Шаблон group_list сформирован с правильным контекстом."""
         response = self.guest_client.get(reverse('posts:group_list', kwargs={
-            'slug': PostViewTests.group_1.slug}))
-        context = Post.objects.first()
+            'slug': PostViewTests.group_1.slug}
+                                                 )
+                                         )
+        context = response.context['page_obj'][0]
         self.assertEqual(context.text, 'test_text')
         self.assertEqual(context.group, self.group_1)
 
     def test_profile_show_correct_context(self):
         """Шаблон profile сформирован с правильным контекстом."""
         response = self.auth_client.get(reverse('posts:profile', kwargs={
-            'username': PostViewTests.author.username}))
-        context = Post.objects.first()
+            'username': PostViewTests.author.username}
+                                                      )
+                                              )
+        context = response.context['page_obj'][0]
         context_posts_count = response.context['posts_count']
         self.assertEqual(context.text, self.post.text)
         self.assertEqual(context.author, self.author)
@@ -84,9 +89,12 @@ class PostViewTests(TestCase):
         """Шаблон post_detail сформирован с правильным контекстом."""
         response = self.auth_client.get(
             reverse('posts:post_detail', kwargs={
-                'post_id': PostViewTests.post.id}))
+                'post_id': PostViewTests.post.id}
+                    )
+        )
         self.assertEqual(
-            response.context['post_item'].text, 'test_text')
+            response.context['post_item'].text, 'test_text'
+        )
 
     def test_create_post_show_correct_context(self):
         """Шаблон create_post сформирован с правильным контекстом."""
