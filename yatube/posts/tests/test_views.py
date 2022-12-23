@@ -38,17 +38,13 @@ class PostViewTests(TestCase):
         templates_page_names = {
             'posts/index.html': reverse('posts:index'),
             'posts/group_list.html': reverse('posts:group_list', kwargs={
-                'slug': PostViewTests.group_1.slug}
-                                             ),
+                'slug': PostViewTests.group_1.slug}),
             'posts/profile.html': reverse('posts:profile', kwargs={
-                'username': PostViewTests.author.username}
-                                          ),
+                'username': PostViewTests.author.username}),
             'posts/post_detail.html': reverse('posts:post_detail', kwargs={
-                'post_id': PostViewTests.post.id}
-                                              ),
+                'post_id': PostViewTests.post.id}),
             'posts/create_post.html': reverse('posts:post_edit', kwargs={
-                'post_id': PostViewTests.post.id}
-                                              ),
+                'post_id': PostViewTests.post.id}),
         }
         for template, reverse_name in templates_page_names.items():
             with self.subTest(template=template):
@@ -66,9 +62,7 @@ class PostViewTests(TestCase):
     def test_group_list_show_correct_context(self):
         """Шаблон group_list сформирован с правильным контекстом."""
         response = self.guest_client.get(reverse('posts:group_list', kwargs={
-            'slug': PostViewTests.group_1.slug}
-                                                 )
-                                         )
+            'slug': PostViewTests.group_1.slug}))
         context = response.context['page_obj'][0]
         self.assertEqual(context.text, 'test_text')
         self.assertEqual(context.group, self.group_1)
@@ -76,9 +70,7 @@ class PostViewTests(TestCase):
     def test_profile_show_correct_context(self):
         """Шаблон profile сформирован с правильным контекстом."""
         response = self.auth_client.get(reverse('posts:profile', kwargs={
-            'username': PostViewTests.author.username}
-                                                      )
-                                              )
+            'username': PostViewTests.author.username}))
         context = response.context['page_obj'][0]
         context_posts_count = response.context['posts_count']
         self.assertEqual(context.text, self.post.text)
@@ -89,12 +81,9 @@ class PostViewTests(TestCase):
         """Шаблон post_detail сформирован с правильным контекстом."""
         response = self.auth_client.get(
             reverse('posts:post_detail', kwargs={
-                'post_id': PostViewTests.post.id}
-                    )
-        )
+                'post_id': PostViewTests.post.id}))
         self.assertEqual(
-            response.context['post_item'].text, 'test_text'
-        )
+            response.context['post_item'].text, 'test_text')
 
     def test_create_post_show_correct_context(self):
         """Шаблон create_post сформирован с правильным контекстом."""
@@ -128,21 +117,16 @@ class PostViewTests(TestCase):
         response_index = self.auth_client.get(reverse('posts:index'))
         response_group_list = self.auth_client.get(reverse(
             'posts:group_list',
-            kwargs={'slug': PostViewTests.group_1.slug}
-        )
-        )
+            kwargs={'slug': PostViewTests.group_1.slug}))
         response_profile = self.auth_client.get(reverse(
             'posts:profile',
-            kwargs={'username': PostViewTests.author.username}
-        )
-        )
+            kwargs={'username': PostViewTests.author.username}))
         for response in [response_index,
                          response_group_list, response_profile]:
             context = response.context['page_obj'][0]
             with self.subTest():
                 self.assertTrue(PostViewTests.post
-                                in response.context['page_obj']
-                                )
+                                in response.context['page_obj'])
                 self.assertEqual(context.text, PostViewTests.post.text)
                 self.assertEqual(context.author, PostViewTests.author)
                 self.assertEqual(context.group, PostViewTests.group_1)
@@ -152,12 +136,9 @@ class PostViewTests(TestCase):
         для которой не был предназначен."""
         response = self.auth_client.get(reverse(
             'posts:group_list',
-            kwargs={'slug': PostViewTests.group_2.slug}
-        )
-        )
+            kwargs={'slug': PostViewTests.group_2.slug}))
         self.assertTrue(PostViewTests.post
-                        not in response.context['page_obj']
-                        )
+                        not in response.context['page_obj'])
 
 
 class PaginatorViewsTest(TestCase):
