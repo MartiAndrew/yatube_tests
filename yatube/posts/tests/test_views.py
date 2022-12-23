@@ -29,8 +29,8 @@ class PostViewTests(TestCase):
 
     def setUp(self):
         self.guest_client = Client()
-        self.authorized_client = Client()
-        self.authorized_client.force_login(self.author)
+        self.auth_client = Client()
+        self.auth_client.force_login(self.author)
 
     def test_pages_uses_correct_template(self):
         """Проверка какие вызываются шаблоны, при вызове вьюхи через name"""
@@ -51,12 +51,12 @@ class PostViewTests(TestCase):
         }
         for template, reverse_name in templates_page_names.items():
             with self.subTest(template=template):
-                response = self.authorized_client.get(reverse_name)
+                response = self.auth_client.get(reverse_name)
                 self.assertTemplateUsed(response, template)
 
     def test_index_show_correct_context(self):
         """Шаблон index сформирован с правильным контекстом."""
-        response = self.authorized_client.get(reverse('posts:index'))
+        response = self.auth_client.get(reverse('posts:index'))
         context = response.context['page_obj'][0]
         self.assertEqual(context.text, 'test_text')
         self.assertEqual(context.author, self.author)
@@ -74,7 +74,7 @@ class PostViewTests(TestCase):
 
     def test_profile_show_correct_context(self):
         """Шаблон profile сформирован с правильным контекстом."""
-        response = self.authorized_client.get(reverse('posts:profile', kwargs={
+        response = self.auth_client.get(reverse('posts:profile', kwargs={
             'username': PostViewTests.author.username}
                                                       )
                                               )
@@ -86,7 +86,7 @@ class PostViewTests(TestCase):
 
     def test_post_detail_show_correct_context(self):
         """Шаблон post_detail сформирован с правильным контекстом."""
-        response = self.authorized_client.get(
+        response = self.auth_client.get(
             reverse('posts:post_detail', kwargs={
                 'post_id': PostViewTests.post.id}
                     )
@@ -97,7 +97,7 @@ class PostViewTests(TestCase):
 
     def test_create_post_show_correct_context(self):
         """Шаблон create_post сформирован с правильным контекстом."""
-        response = self.authorized_client.get(reverse('posts:post_create'))
+        response = self.auth_client.get(reverse('posts:post_create'))
         form_fields = {
             'text': forms.fields.CharField,
             'group': forms.models.ModelChoiceField,
@@ -109,7 +109,7 @@ class PostViewTests(TestCase):
 
     def test_edit_post_show_correct_context(self):
         """Шаблон edit_post сформирован с правильным контекстом."""
-        response = self.authorized_client.get(reverse(
+        response = self.auth_client.get(reverse(
             'posts:post_edit', kwargs={'post_id': PostViewTests.post.id}
         )
         )
@@ -124,13 +124,13 @@ class PostViewTests(TestCase):
 
     def test_post_is_on_pages(self):
         """Проверка, что созданный пост появляется на нужных страницах."""
-        response_index = self.authorized_client.get(reverse('posts:index'))
-        response_group_list = self.authorized_client.get(reverse(
+        response_index = self.auth_client.get(reverse('posts:index'))
+        response_group_list = self.auth_client.get(reverse(
             'posts:group_list',
             kwargs={'slug': PostViewTests.group_1.slug}
         )
         )
-        response_profile = self.authorized_client.get(reverse(
+        response_profile = self.auth_client.get(reverse(
             'posts:profile',
             kwargs={'username': PostViewTests.author.username}
         )
@@ -149,7 +149,7 @@ class PostViewTests(TestCase):
     def test_post_in_right_group(self):
         """Проверка, что этот пост не попал в группу,
         для которой не был предназначен."""
-        response = self.authorized_client.get(reverse(
+        response = self.auth_client.get(reverse(
             'posts:group_list',
             kwargs={'slug': PostViewTests.group_2.slug}
         )
