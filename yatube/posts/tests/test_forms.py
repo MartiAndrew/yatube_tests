@@ -39,29 +39,25 @@ class PostsFormsTests(TestCase):
 
     def test_edit_group_post(self):
         """Редактирование поста"""
-        self.post = Post.objects.create(text='Тестовый текст',
+        post = Post.objects.create(text='Тестовый текст',
                                         author=self.author,
                                         group=self.group
                                         )
-        old_text = self.post
-        self.group2 = Group.objects.create(title='Тестовая группа2',
+        new_group = Group.objects.create(title='Тестовая группа2',
                                            slug='test-group',
                                            description='Описание'
                                            )
         form_data = {'text': 'Текст записанный в форму',
-                     'group': self.group2.id}
+                     'group': new_group.id}
         response = self.auth_client.post(
-            reverse('posts:post_edit', kwargs={'post_id': old_text.id}),
+            reverse('posts:post_edit', kwargs={'post_id': post.id}),
             data=form_data,
             follow=True
         )
-        edited_post = Post.objects.get(id=old_text.id)
-        self.assertEqual(edited_post.text, form_data['text'])
-        self.assertEqual(Post.objects.filter(
-            group=self.group).count(), 0)
+        edited_post = Post.objects.get(id=post.id)
         self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertEqual(edited_post.text, form_data['text'])
+        self.assertEqual(edited_post.group.id, form_data['group'])
+        self.assertEqual(edited_post.author, post.author)
+        self.assertEqual(self.group.posts.count(), 0)
         self.assertEqual(Post.objects.count(), 1)
-        self.assertTrue(Post.objects.filter(
-            group=self.group2.id,
-            author=self.author
-        ).exists(), 'Данные поста не совпадают')
