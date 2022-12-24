@@ -40,13 +40,13 @@ class PostsFormsTests(TestCase):
     def test_edit_group_post(self):
         """Редактирование поста"""
         post = Post.objects.create(text='Тестовый текст',
-                                        author=self.author,
-                                        group=self.group
-                                  )
+                                   author=self.author,
+                                   group=self.group
+                                   )
         new_group = Group.objects.create(title='Тестовая группа2',
-                                           slug='test-group',
-                                      description='Описание'
-                                        )
+                                         slug='test-group',
+                                         description='Описание'
+                                         )
         form_data = {'text': 'Текст записанный в форму',
                      'group': new_group.id}
         response = self.auth_client.post(
