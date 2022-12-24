@@ -17,6 +17,13 @@ class PostURLTests(TestCase):
             text='test_post_text',
             author=cls.author
         )
+        cls.field_url_names = {
+            '/': HTTPStatus.OK,
+            f'/group/{PostURLTests.group.slug}/': HTTPStatus.OK,
+            f'/profile/{PostURLTests.author}/': HTTPStatus.OK,
+            f'/posts/{PostURLTests.post.id}/': HTTPStatus.OK,
+            '/unexisting_page/': HTTPStatus.NOT_FOUND,
+        }
 
     def setUp(self):
         self.guest_client = Client()
@@ -25,14 +32,8 @@ class PostURLTests(TestCase):
 
     def test_urls_for_guests(self):
         """Страницы доступны любому пользователю."""
-        field_url_names = {
-            '/': HTTPStatus.OK,
-            f'/group/{PostURLTests.group.slug}/': HTTPStatus.OK,
-            f'/profile/{PostURLTests.author}/': HTTPStatus.OK,
-            f'/posts/{PostURLTests.post.id}/': HTTPStatus.OK,
-            '/unexisting_page/': HTTPStatus.NOT_FOUND,
-        }
-        for value, expected in field_url_names.items():
+
+        for value, expected in self.field_url_names.items():
             with self.subTest(value=value):
                 response = self.client.get(value).status_code
                 self.assertEqual(response, expected)

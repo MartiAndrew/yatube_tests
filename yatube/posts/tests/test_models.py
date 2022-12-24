@@ -1,7 +1,5 @@
 from django.test import TestCase
-from ..models import Group, Post, User
-
-NUM_SYMB = 15
+from ..models import Group, Post, User, NUM_SYMB
 
 
 class PostModelTest(TestCase):
