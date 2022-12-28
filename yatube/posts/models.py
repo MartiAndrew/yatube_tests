@@ -37,6 +37,12 @@ class Post(models.Model):
         verbose_name='Группа',
         help_text='Выберите группу',
     )
+    image = models.ImageField(
+        verbose_name='Картинка',
+        help_text='Загрузите картинку',
+        upload_to='posts/',
+        blank=True
+    )
 
     def __str__(self):
         return self.text[:NUM_SYMB]
@@ -45,3 +51,29 @@ class Post(models.Model):
         default_related_name = 'posts'
         ordering = ['-pub_date']
         verbose_name_plural = 'Посты'
+
+
+class Comment(models.Model):
+    post = models.ForeignKey(
+        Post,
+        on_delete=models.CASCADE,
+        related_name='comments',
+        verbose_name='Пост')
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='comments',
+        verbose_name='Автор')
+    text = models.TextField(
+        verbose_name='Комментарий')
+    created = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Создан')
+
+    class Meta:
+        ordering = ['-created']
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
+
+    def __str__(self):
+        return self.text[:15]

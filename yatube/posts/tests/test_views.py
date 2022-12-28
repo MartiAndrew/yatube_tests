@@ -58,6 +58,7 @@ class PostViewTests(TestCase):
         self.assertEqual(context.text, 'test_text')
         self.assertEqual(context.author, self.author)
         self.assertEqual(context.group, self.group_1)
+        self.assertEqual(context.image, self.post.image)
 
     def test_group_list_show_correct_context(self):
         """Шаблон group_list сформирован с правильным контекстом."""
@@ -66,6 +67,7 @@ class PostViewTests(TestCase):
         context = response.context['page_obj'][0]
         self.assertEqual(context.text, 'test_text')
         self.assertEqual(context.group, self.group_1)
+        self.assertEqual(context.image, self.post.image)
 
     def test_profile_show_correct_context(self):
         """Шаблон profile сформирован с правильным контекстом."""
@@ -76,6 +78,7 @@ class PostViewTests(TestCase):
         self.assertEqual(context.text, self.post.text)
         self.assertEqual(context.author, self.author)
         self.assertEqual(context_posts_count, Post.objects.count())
+        self.assertEqual(context.image, self.post.image)
 
     def test_post_detail_show_correct_context(self):
         """Шаблон post_detail сформирован с правильным контекстом."""
@@ -84,6 +87,8 @@ class PostViewTests(TestCase):
                 'post_id': PostViewTests.post.id}))
         self.assertEqual(
             response.context['post_item'].text, 'test_text')
+        self.assertEqual(
+            response.context['post_item'].image, self.post.image)
 
     def test_create_post_show_correct_context(self):
         """Шаблон create_post сформирован с правильным контекстом."""

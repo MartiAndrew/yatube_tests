@@ -19,10 +19,11 @@
                 {% endif %}
             </div>
             <div class="card-body">
-                <form method="post">
+                <form method="post" enctype="multipart/form-data">
                     {% csrf_token %}
                     {% for field in form %}
                     <div class="group">
+                        <br>
                         {{ field }}
                         <span class="highlight"></span>
                         <span class="bar"></span>
@@ -35,6 +36,7 @@
                         {% endif %}
                     </div>
                     {% endfor %}
+                    <br>
                     {% if is_edit %}
                     <button type="submit" class="btn btn-primary">
                         Сохранить
