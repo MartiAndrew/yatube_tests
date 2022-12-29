@@ -1,12 +1,15 @@
-# from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404
 from .models import Post, Group, User
 from .forms import PostForm, CommentForm
 from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.cache import cache_page
 from .utilities import get_paginator
 
+CACHE_TIME = 20
 
+
+@cache_page(CACHE_TIME)
 def index(request):
     post_list = Post.objects.select_related('author', 'group')
     return render(request, 'posts/index.html', context={
@@ -84,7 +87,8 @@ def post_edit(request, post_id):
 def add_comment(request, post_id):
     post = get_object_or_404(
         Post.objects.select_related('author'),
-        pk=post_id)
+        pk=post_id
+    )
     form = CommentForm(request.POST or None)
     if form.is_valid():
         comment = form.save(commit=False)

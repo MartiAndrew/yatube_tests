@@ -1,11 +1,15 @@
 from django import forms
 from django.test import Client, TestCase
 from django.urls import reverse
+from django.core.cache import cache
 from posts.models import Group, Post, User
 
 PAGE_1_POSTS = 10
 
 
+# Леш, здравствуй. Решил сделать кэш через view-функцию. Не знаю насколько правильно,
+# Возникли проблемы с тестами, с добавлением cache.clear(). В пачке писали, что если
+# через шаблон кэш реализовывать, то нет этой проблемы. Не совсем понял, почему так?
 class PostViewTests(TestCase):
     @classmethod
     def setUpClass(cls):
@@ -32,19 +36,24 @@ class PostViewTests(TestCase):
         self.guest_client = Client()
         self.auth_client = Client()
         self.auth_client.force_login(self.author)
+        cache.clear()
 
     def test_pages_uses_correct_template(self):
         """Проверка какие вызываются шаблоны, при вызове вьюхи через name"""
         templates_page_names = {
             'posts/index.html': reverse('posts:index'),
             'posts/group_list.html': reverse('posts:group_list', kwargs={
-                'slug': PostViewTests.group_1.slug}),
+                'slug': PostViewTests.group_1.slug}
+                                             ),
             'posts/profile.html': reverse('posts:profile', kwargs={
-                'username': PostViewTests.author.username}),
+                'username': PostViewTests.author.username}
+                                          ),
             'posts/post_detail.html': reverse('posts:post_detail', kwargs={
-                'post_id': PostViewTests.post.id}),
+                'post_id': PostViewTests.post.id}
+                                              ),
             'posts/create_post.html': reverse('posts:post_edit', kwargs={
-                'post_id': PostViewTests.post.id}),
+                'post_id': PostViewTests.post.id}
+                                              ),
         }
         for template, reverse_name in templates_page_names.items():
             with self.subTest(template=template):
@@ -63,7 +72,9 @@ class PostViewTests(TestCase):
     def test_group_list_show_correct_context(self):
         """Шаблон group_list сформирован с правильным контекстом."""
         response = self.guest_client.get(reverse('posts:group_list', kwargs={
-            'slug': PostViewTests.group_1.slug}))
+            'slug': PostViewTests.group_1.slug}
+                                                 )
+                                         )
         context = response.context['page_obj'][0]
         self.assertEqual(context.text, 'test_text')
         self.assertEqual(context.group, self.group_1)
@@ -72,7 +83,9 @@ class PostViewTests(TestCase):
     def test_profile_show_correct_context(self):
         """Шаблон profile сформирован с правильным контекстом."""
         response = self.auth_client.get(reverse('posts:profile', kwargs={
-            'username': PostViewTests.author.username}))
+            'username': PostViewTests.author.username}
+                                                )
+                                        )
         context = response.context['page_obj'][0]
         context_posts_count = response.context['posts_count']
         self.assertEqual(context.text, self.post.text)
@@ -84,11 +97,15 @@ class PostViewTests(TestCase):
         """Шаблон post_detail сформирован с правильным контекстом."""
         response = self.auth_client.get(
             reverse('posts:post_detail', kwargs={
-                'post_id': PostViewTests.post.id}))
+                'post_id': PostViewTests.post.id}
+                    )
+        )
         self.assertEqual(
-            response.context['post_item'].text, 'test_text')
+            response.context['post_item'].text, 'test_text'
+        )
         self.assertEqual(
-            response.context['post_item'].image, self.post.image)
+            response.context['post_item'].image, self.post.image
+        )
 
     def test_create_post_show_correct_context(self):
         """Шаблон create_post сформирован с правильным контекстом."""
@@ -122,16 +139,21 @@ class PostViewTests(TestCase):
         response_index = self.auth_client.get(reverse('posts:index'))
         response_group_list = self.auth_client.get(reverse(
             'posts:group_list',
-            kwargs={'slug': PostViewTests.group_1.slug}))
+            kwargs={'slug': PostViewTests.group_1.slug}
+        )
+        )
         response_profile = self.auth_client.get(reverse(
             'posts:profile',
-            kwargs={'username': PostViewTests.author.username}))
+            kwargs={'username': PostViewTests.author.username}
+        )
+        )
         for response in [response_index,
                          response_group_list, response_profile]:
             context = response.context['page_obj'][0]
             with self.subTest():
                 self.assertTrue(PostViewTests.post
-                                in response.context['page_obj'])
+                                in response.context['page_obj']
+                                )
                 self.assertEqual(context.text, PostViewTests.post.text)
                 self.assertEqual(context.author, PostViewTests.author)
                 self.assertEqual(context.group, PostViewTests.group_1)
@@ -141,9 +163,28 @@ class PostViewTests(TestCase):
         для которой не был предназначен."""
         response = self.auth_client.get(reverse(
             'posts:group_list',
-            kwargs={'slug': PostViewTests.group_2.slug}))
+            kwargs={'slug': PostViewTests.group_2.slug}
+        )
+        )
         self.assertTrue(PostViewTests.post
-                        not in response.context['page_obj'])
+                        not in response.context['page_obj']
+                        )
+
+    def test_cache_index_page(self):
+        """Проверка работы кеша"""
+        post = Post.objects.create(
+            text='Пост для кеширования',
+            author=self.author)
+        post_text_add = self.auth_client.get(
+            reverse('posts:index')).content
+        post.delete()
+        post_text_delete = self.auth_client.get(
+            reverse('posts:index')).content
+        self.assertEqual(post_text_add, post_text_delete)
+        cache.clear()
+        post_text_cache_clear = self.auth_client.get(
+            reverse('posts:index')).content
+        self.assertNotEqual(post_text_add, post_text_cache_clear)
 
 
 class PaginatorViewsTest(TestCase):
@@ -164,15 +205,18 @@ class PaginatorViewsTest(TestCase):
             group=cls.group
         ) for i in range(13))
         cls.posts = Post.objects.bulk_create(batch)
+        cache.clear()
 
     def test_posts_pages_correct_paginator_work(self):
         """Проверка паджинатора на нужных страницах"""
         urls_names_2page = {
             reverse('posts:index'): 3,
             reverse('posts:group_list', kwargs={
-                'slug': PaginatorViewsTest.group.slug}): 3,
+                'slug': PaginatorViewsTest.group.slug}
+                    ): 3,
             reverse('posts:profile', kwargs={
-                'username': PaginatorViewsTest.author.username}): 3,
+                'username': PaginatorViewsTest.author.username}
+                    ): 3,
         }
 
         for page, page_2_posts in urls_names_2page.items():

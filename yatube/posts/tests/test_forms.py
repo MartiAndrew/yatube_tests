@@ -18,7 +18,7 @@ class PostsFormsTests(TestCase):
         super().setUpClass()
         cls.author = User.objects.create_user(username='Andrey')
         cls.comm_author = User.objects.create_user(
-            username='comm_author')
+            username='commentator')
         cls.group = Group.objects.create(
             title='test_group',
             slug='test_slug',
@@ -41,7 +41,7 @@ class PostsFormsTests(TestCase):
         post = Post.objects.create(
             text='Текст поста для комментирования',
             author=self.author)
-        form_data = {'text': 'Тестовый коментарий'}
+        form_data = {'text': 'Тестовый комментарий'}
         response = self.auth_user_comm.post(
             reverse('posts:add_comment', kwargs={'post_id': post.id}),
             data=form_data,

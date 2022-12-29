@@ -1,5 +1,6 @@
 from http import HTTPStatus
 from django.test import Client, TestCase
+from django.core.cache import cache
 from posts.models import Group, Post, User
 
 
@@ -28,6 +29,7 @@ class PostURLTests(TestCase):
         self.guest_client = Client()
         self.authorized_client = Client()
         self.authorized_client.force_login(self.author)
+        cache.clear()
 
     def test_urls_for_guests(self):
         """Страницы доступны любому пользователю."""
