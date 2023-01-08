@@ -2,7 +2,7 @@ from django import forms
 from django.test import Client, TestCase
 from django.urls import reverse
 from django.core.cache import cache
-from posts.models import Group, Post, User
+from posts.models import Group, Post, Follow, User
 
 PAGE_1_POSTS = 10
 
@@ -232,3 +232,69 @@ class PaginatorViewsTest(TestCase):
                     len(response_page_2.context['page_obj']),
                     page_2_posts
                 )
+
+
+class FollowViewsTest(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.post_author = User.objects.create(
+            username='post_author',
+        )
+        cls.post_follower = User.objects.create(
+            username='post_follower',
+        )
+        cls.post = Post.objects.create(
+            text='пост для подписки',
+            author=cls.post_author,
+        )
+
+    def setUp(self):
+        cache.clear()
+        self.author_client = Client()
+        self.author_client.force_login(self.post_author)
+        self.follower_client = Client()
+        self.follower_client.force_login(self.post_follower)
+
+    def test_follow(self):
+        """Проверка подписки на пользователя."""
+        self.follower_client.post(reverse(
+                'posts:profile_follow',
+                kwargs={'username': self.post_author}))
+        self.assertEqual(Follow.objects.count(), 1)
+
+    def test_unfollow(self):
+        """Проверка отписки от пользователя."""
+        Follow.objects.create(user=self.post_follower,
+                              author=self.post_author)
+        self.follower_client.post(reverse(
+                'posts:profile_unfollow',
+                kwargs={'username': self.post_author}))
+        self.assertEqual(Follow.objects.count(), 0)
+
+    def test_follow_on_authors(self):
+        """Проверка новых записей у тех кто подписан."""
+        post = Post.objects.create(
+            author=self.post_author,
+            text="пост для подписки"
+        )
+        Follow.objects.create(
+            user=self.post_follower,
+            author=self.post_author
+        )
+        response = self.follower_client.get(
+            reverse('posts:follow_index')
+        )
+        self.assertIn(post, response.context['page_obj'].object_list)
+
+    def test_notfollow_on_authors(self):
+        """Проверка новых записей у тех кто не подписан."""
+        post = Post.objects.create(
+            author=self.post_author,
+            text="пост для подписки"
+        )
+        response = self.follower_client.get(
+            reverse('posts:follow_index')
+        )
+        self.assertNotIn(post, response.context['page_obj'].object_list)
+
