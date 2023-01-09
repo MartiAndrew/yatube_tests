@@ -258,8 +258,7 @@ class FollowViewsTest(TestCase):
 
     def test_follow(self):
         """Проверка подписки на пользователя."""
-        self.follower_client.post(reverse(
-                'posts:profile_follow',
+        self.follower_client.post(reverse('posts:profile_follow',
                 kwargs={'username': self.post_author}))
         self.assertEqual(Follow.objects.count(), 1)
 
@@ -267,34 +266,22 @@ class FollowViewsTest(TestCase):
         """Проверка отписки от пользователя."""
         Follow.objects.create(user=self.post_follower,
                               author=self.post_author)
-        self.follower_client.post(reverse(
-                'posts:profile_unfollow',
+        self.follower_client.post(reverse('posts:profile_unfollow',
                 kwargs={'username': self.post_author}))
         self.assertEqual(Follow.objects.count(), 0)
 
     def test_follow_on_authors(self):
         """Проверка новых записей у тех кто подписан."""
-        post = Post.objects.create(
-            author=self.post_author,
-            text="пост для подписки"
-        )
-        Follow.objects.create(
-            user=self.post_follower,
-            author=self.post_author
-        )
-        response = self.follower_client.get(
-            reverse('posts:follow_index')
-        )
+        post = Post.objects.create(author=self.post_author,
+                                   text="пост для подписки")
+        Follow.objects.create(user=self.post_follower,
+                              author=self.post_author)
+        response = self.follower_client.get(reverse('posts:follow_index'))
         self.assertIn(post, response.context['page_obj'].object_list)
 
     def test_notfollow_on_authors(self):
         """Проверка новых записей у тех кто не подписан."""
-        post = Post.objects.create(
-            author=self.post_author,
-            text="пост для подписки"
-        )
-        response = self.follower_client.get(
-            reverse('posts:follow_index')
-        )
+        post = Post.objects.create(author=self.post_author,
+                                   text="пост для подписки")
+        response = self.follower_client.get(reverse('posts:follow_index'))
         self.assertNotIn(post, response.context['page_obj'].object_list)
-
